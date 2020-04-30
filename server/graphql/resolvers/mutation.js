@@ -16,6 +16,14 @@ const Mutation = {
   createUser(root, args, context) {
     return context.prisma.createUser({ name: args.name });
   },
+  createItem(root, args, context) {
+    if (args.title.trim().length < 3) return;
+
+    return context.prisma.createItem({ title: args.title });
+  },
+  deleteItem(root, args, context) {
+    return context.prisma.deleteItem({ id: args.id });
+  },
 };
 
 module.exports = { Mutation };

@@ -12,6 +12,9 @@ const Query = {
       })
       .posts();
   },
+  items(root, args, context) {
+    return context.prisma.items();
+  },
 };
 
 module.exports = { Query };
