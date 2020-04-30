@@ -11,7 +11,7 @@ services:
         databases:
           default:
             connector: mongo
-            uri: <DATABASE_URL>
+            uri: mongodb://prisma:prisma@mongo:27017
   mongo:
     image: mongo:3.6
     restart: always

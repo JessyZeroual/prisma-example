@@ -10,11 +10,6 @@ Installer Prisma en global
 npm install -g prisma
 ```
 
-Dans le fichier `server/prisma/docker-compose.yml.example` :
-
-- Remplacer `<DATABASE_URL>` par votre connection String mongoDB
-- Renommer le fichier `docker-compose.yml.example` par `docker-compose.yml`
-
 ### Démarrer le serveur
 
 ```
