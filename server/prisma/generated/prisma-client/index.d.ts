@@ -179,13 +179,13 @@ export interface ClientConstructor<T> {
  * Types
  */
 
-export type MutationType = "CREATED" | "UPDATED" | "DELETED";
-
 export type ItemOrderByInput =
   | "id_ASC"
   | "id_DESC"
   | "title_ASC"
-  | "title_DESC";
+  | "title_DESC"
+  | "done_ASC"
+  | "done_DESC";
 
 export type PostOrderByInput =
   | "id_ASC"
@@ -194,6 +194,8 @@ export type PostOrderByInput =
   | "title_DESC"
   | "published_ASC"
   | "published_DESC";
+
+export type MutationType = "CREATED" | "UPDATED" | "DELETED";
 
 export type UserOrderByInput =
   | "id_ASC"
@@ -359,6 +361,7 @@ export interface PostWhereInput {
 export interface ItemCreateInput {
   id?: Maybe<ID_Input>;
   title: String;
+  done?: Maybe<Boolean>;
 }
 
 export interface ItemWhereInput {
@@ -390,6 +393,8 @@ export interface ItemWhereInput {
   title_not_starts_with?: Maybe<String>;
   title_ends_with?: Maybe<String>;
   title_not_ends_with?: Maybe<String>;
+  done?: Maybe<Boolean>;
+  done_not?: Maybe<Boolean>;
   AND?: Maybe<ItemWhereInput[] | ItemWhereInput>;
   OR?: Maybe<ItemWhereInput[] | ItemWhereInput>;
   NOT?: Maybe<ItemWhereInput[] | ItemWhereInput>;
@@ -397,6 +402,7 @@ export interface ItemWhereInput {
 
 export interface ItemUpdateInput {
   title?: Maybe<String>;
+  done?: Maybe<Boolean>;
 }
 
 export interface UserSubscriptionWhereInput {
@@ -412,6 +418,7 @@ export interface UserSubscriptionWhereInput {
 
 export interface ItemUpdateManyMutationInput {
   title?: Maybe<String>;
+  done?: Maybe<Boolean>;
 }
 
 export type UserWhereUniqueInput = AtLeastOne<{
@@ -569,6 +576,47 @@ export interface UserPreviousValuesSubscription
   name: () => Promise<AsyncIterator<String>>;
 }
 
+export interface AggregateItem {
+  count: Int;
+}
+
+export interface AggregateItemPromise
+  extends Promise<AggregateItem>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateItemSubscription
+  extends Promise<AsyncIterator<AggregateItem>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface PostSubscriptionPayload {
+  mutation: MutationType;
+  node: Post;
+  updatedFields: String[];
+  previousValues: PostPreviousValues;
+}
+
+export interface PostSubscriptionPayloadPromise
+  extends Promise<PostSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = PostPromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = PostPreviousValuesPromise>() => T;
+}
+
+export interface PostSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<PostSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = PostSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = PostPreviousValuesSubscription>() => T;
+}
+
 export interface ItemEdge {
   node: Item;
   cursor: String;
@@ -586,26 +634,27 @@ export interface ItemEdgeSubscription
   cursor: () => Promise<AsyncIterator<String>>;
 }
 
-export interface PostPreviousValues {
-  id: ID_Output;
-  title: String;
-  published: Boolean;
+export interface PageInfo {
+  hasNextPage: Boolean;
+  hasPreviousPage: Boolean;
+  startCursor?: String;
+  endCursor?: String;
 }
 
-export interface PostPreviousValuesPromise
-  extends Promise<PostPreviousValues>,
-    Fragmentable {
-  id: () => Promise<ID_Output>;
-  title: () => Promise<String>;
-  published: () => Promise<Boolean>;
+export interface PageInfoPromise extends Promise<PageInfo>, Fragmentable {
+  hasNextPage: () => Promise<Boolean>;
+  hasPreviousPage: () => Promise<Boolean>;
+  startCursor: () => Promise<String>;
+  endCursor: () => Promise<String>;
 }
 
-export interface PostPreviousValuesSubscription
-  extends Promise<AsyncIterator<PostPreviousValues>>,
+export interface PageInfoSubscription
+  extends Promise<AsyncIterator<PageInfo>>,
     Fragmentable {
-  id: () => Promise<AsyncIterator<ID_Output>>;
-  title: () => Promise<AsyncIterator<String>>;
-  published: () => Promise<AsyncIterator<Boolean>>;
+  hasNextPage: () => Promise<AsyncIterator<Boolean>>;
+  hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
+  startCursor: () => Promise<AsyncIterator<String>>;
+  endCursor: () => Promise<AsyncIterator<String>>;
 }
 
 export interface BatchPayload {
@@ -641,45 +690,6 @@ export interface UserEdgeSubscription
   cursor: () => Promise<AsyncIterator<String>>;
 }
 
-export interface PageInfo {
-  hasNextPage: Boolean;
-  hasPreviousPage: Boolean;
-  startCursor?: String;
-  endCursor?: String;
-}
-
-export interface PageInfoPromise extends Promise<PageInfo>, Fragmentable {
-  hasNextPage: () => Promise<Boolean>;
-  hasPreviousPage: () => Promise<Boolean>;
-  startCursor: () => Promise<String>;
-  endCursor: () => Promise<String>;
-}
-
-export interface PageInfoSubscription
-  extends Promise<AsyncIterator<PageInfo>>,
-    Fragmentable {
-  hasNextPage: () => Promise<AsyncIterator<Boolean>>;
-  hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
-  startCursor: () => Promise<AsyncIterator<String>>;
-  endCursor: () => Promise<AsyncIterator<String>>;
-}
-
-export interface AggregatePost {
-  count: Int;
-}
-
-export interface AggregatePostPromise
-  extends Promise<AggregatePost>,
-    Fragmentable {
-  count: () => Promise<Int>;
-}
-
-export interface AggregatePostSubscription
-  extends Promise<AsyncIterator<AggregatePost>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Int>>;
-}
-
 export interface ItemConnection {
   pageInfo: PageInfo;
   edges: ItemEdge[];
@@ -701,25 +711,20 @@ export interface ItemConnectionSubscription
   aggregate: <T = AggregateItemSubscription>() => T;
 }
 
-export interface PostConnection {
-  pageInfo: PageInfo;
-  edges: PostEdge[];
+export interface AggregatePost {
+  count: Int;
 }
 
-export interface PostConnectionPromise
-  extends Promise<PostConnection>,
+export interface AggregatePostPromise
+  extends Promise<AggregatePost>,
     Fragmentable {
-  pageInfo: <T = PageInfoPromise>() => T;
-  edges: <T = FragmentableArray<PostEdge>>() => T;
-  aggregate: <T = AggregatePostPromise>() => T;
+  count: () => Promise<Int>;
 }
 
-export interface PostConnectionSubscription
-  extends Promise<AsyncIterator<PostConnection>>,
+export interface AggregatePostSubscription
+  extends Promise<AsyncIterator<AggregatePost>>,
     Fragmentable {
-  pageInfo: <T = PageInfoSubscription>() => T;
-  edges: <T = Promise<AsyncIterator<PostEdgeSubscription>>>() => T;
-  aggregate: <T = AggregatePostSubscription>() => T;
+  count: () => Promise<AsyncIterator<Int>>;
 }
 
 export interface UserSubscriptionPayload {
@@ -745,6 +750,27 @@ export interface UserSubscriptionPayloadSubscription
   node: <T = UserSubscription>() => T;
   updatedFields: () => Promise<AsyncIterator<String[]>>;
   previousValues: <T = UserPreviousValuesSubscription>() => T;
+}
+
+export interface PostConnection {
+  pageInfo: PageInfo;
+  edges: PostEdge[];
+}
+
+export interface PostConnectionPromise
+  extends Promise<PostConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<PostEdge>>() => T;
+  aggregate: <T = AggregatePostPromise>() => T;
+}
+
+export interface PostConnectionSubscription
+  extends Promise<AsyncIterator<PostConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<PostEdgeSubscription>>>() => T;
+  aggregate: <T = AggregatePostSubscription>() => T;
 }
 
 export interface Post {
@@ -778,58 +804,32 @@ export interface PostNullablePromise
   author: <T = UserPromise>() => T;
 }
 
-export interface PostSubscriptionPayload {
-  mutation: MutationType;
-  node: Post;
-  updatedFields: String[];
-  previousValues: PostPreviousValues;
-}
-
-export interface PostSubscriptionPayloadPromise
-  extends Promise<PostSubscriptionPayload>,
-    Fragmentable {
-  mutation: () => Promise<MutationType>;
-  node: <T = PostPromise>() => T;
-  updatedFields: () => Promise<String[]>;
-  previousValues: <T = PostPreviousValuesPromise>() => T;
-}
-
-export interface PostSubscriptionPayloadSubscription
-  extends Promise<AsyncIterator<PostSubscriptionPayload>>,
-    Fragmentable {
-  mutation: () => Promise<AsyncIterator<MutationType>>;
-  node: <T = PostSubscription>() => T;
-  updatedFields: () => Promise<AsyncIterator<String[]>>;
-  previousValues: <T = PostPreviousValuesSubscription>() => T;
-}
-
-export interface Item {
+export interface PostPreviousValues {
   id: ID_Output;
   title: String;
+  published: Boolean;
 }
 
-export interface ItemPromise extends Promise<Item>, Fragmentable {
+export interface PostPreviousValuesPromise
+  extends Promise<PostPreviousValues>,
+    Fragmentable {
   id: () => Promise<ID_Output>;
   title: () => Promise<String>;
+  published: () => Promise<Boolean>;
 }
 
-export interface ItemSubscription
-  extends Promise<AsyncIterator<Item>>,
+export interface PostPreviousValuesSubscription
+  extends Promise<AsyncIterator<PostPreviousValues>>,
     Fragmentable {
   id: () => Promise<AsyncIterator<ID_Output>>;
   title: () => Promise<AsyncIterator<String>>;
-}
-
-export interface ItemNullablePromise
-  extends Promise<Item | null>,
-    Fragmentable {
-  id: () => Promise<ID_Output>;
-  title: () => Promise<String>;
+  published: () => Promise<AsyncIterator<Boolean>>;
 }
 
 export interface ItemPreviousValues {
   id: ID_Output;
   title: String;
+  done: Boolean;
 }
 
 export interface ItemPreviousValuesPromise
@@ -837,6 +837,7 @@ export interface ItemPreviousValuesPromise
     Fragmentable {
   id: () => Promise<ID_Output>;
   title: () => Promise<String>;
+  done: () => Promise<Boolean>;
 }
 
 export interface ItemPreviousValuesSubscription
@@ -844,6 +845,7 @@ export interface ItemPreviousValuesSubscription
     Fragmentable {
   id: () => Promise<AsyncIterator<ID_Output>>;
   title: () => Promise<AsyncIterator<String>>;
+  done: () => Promise<AsyncIterator<Boolean>>;
 }
 
 export interface ItemSubscriptionPayload {
@@ -871,18 +873,46 @@ export interface ItemSubscriptionPayloadSubscription
   previousValues: <T = ItemPreviousValuesSubscription>() => T;
 }
 
-export interface AggregateItem {
+export interface Item {
+  id: ID_Output;
+  title: String;
+  done: Boolean;
+}
+
+export interface ItemPromise extends Promise<Item>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  title: () => Promise<String>;
+  done: () => Promise<Boolean>;
+}
+
+export interface ItemSubscription
+  extends Promise<AsyncIterator<Item>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  title: () => Promise<AsyncIterator<String>>;
+  done: () => Promise<AsyncIterator<Boolean>>;
+}
+
+export interface ItemNullablePromise
+  extends Promise<Item | null>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  title: () => Promise<String>;
+  done: () => Promise<Boolean>;
+}
+
+export interface AggregateUser {
   count: Int;
 }
 
-export interface AggregateItemPromise
-  extends Promise<AggregateItem>,
+export interface AggregateUserPromise
+  extends Promise<AggregateUser>,
     Fragmentable {
   count: () => Promise<Int>;
 }
 
-export interface AggregateItemSubscription
-  extends Promise<AsyncIterator<AggregateItem>>,
+export interface AggregateUserSubscription
+  extends Promise<AsyncIterator<AggregateUser>>,
     Fragmentable {
   count: () => Promise<AsyncIterator<Int>>;
 }
@@ -980,27 +1010,6 @@ export interface UserConnectionSubscription
   aggregate: <T = AggregateUserSubscription>() => T;
 }
 
-export interface AggregateUser {
-  count: Int;
-}
-
-export interface AggregateUserPromise
-  extends Promise<AggregateUser>,
-    Fragmentable {
-  count: () => Promise<Int>;
-}
-
-export interface AggregateUserSubscription
-  extends Promise<AsyncIterator<AggregateUser>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Int>>;
-}
-
-/*
-The `Boolean` scalar type represents `true` or `false`.
-*/
-export type Boolean = boolean;
-
 export type Long = string;
 
 /*
@@ -1013,6 +1022,11 @@ export type ID_Output = string;
 The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. 
 */
 export type Int = number;
+
+/*
+The `Boolean` scalar type represents `true` or `false`.
+*/
+export type Boolean = boolean;
 
 /*
 The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.

@@ -5,6 +5,7 @@ export default gql`
     items {
       id
       title
+      done
     }
   }
 `;

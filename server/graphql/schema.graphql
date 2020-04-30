@@ -11,6 +11,7 @@ type Mutation {
   publish(postId: ID!): Post
   createItem(title: String!): Item
   deleteItem(id: ID!): Item
+  updateItem(id: ID!, title: String, done: Boolean): Item
 }
 
 type User {
@@ -30,4 +31,5 @@ type Post {
 type Item {
   id: ID!
   title: String!
+  done: Boolean!
 }

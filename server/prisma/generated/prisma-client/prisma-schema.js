@@ -22,6 +22,7 @@ type BatchPayload {
 type Item {
   id: ID!
   title: String!
+  done: Boolean!
 }
 
 type ItemConnection {
@@ -33,6 +34,7 @@ type ItemConnection {
 input ItemCreateInput {
   id: ID
   title: String!
+  done: Boolean
 }
 
 type ItemEdge {
@@ -45,11 +47,14 @@ enum ItemOrderByInput {
   id_DESC
   title_ASC
   title_DESC
+  done_ASC
+  done_DESC
 }
 
 type ItemPreviousValues {
   id: ID!
   title: String!
+  done: Boolean!
 }
 
 type ItemSubscriptionPayload {
@@ -72,10 +77,12 @@ input ItemSubscriptionWhereInput {
 
 input ItemUpdateInput {
   title: String
+  done: Boolean
 }
 
 input ItemUpdateManyMutationInput {
   title: String
+  done: Boolean
 }
 
 input ItemWhereInput {
@@ -107,6 +114,8 @@ input ItemWhereInput {
   title_not_starts_with: String
   title_ends_with: String
   title_not_ends_with: String
+  done: Boolean
+  done_not: Boolean
   AND: [ItemWhereInput!]
   OR: [ItemWhereInput!]
   NOT: [ItemWhereInput!]

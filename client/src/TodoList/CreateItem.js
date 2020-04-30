@@ -33,8 +33,8 @@ const CreateItem = () => {
           ref={(node) => {
             input = node;
           }}
-          minlength="3"
-          maxlength="20"
+          minLength="3"
+          maxLength="20"
           type="text"
           placeholder="add item"
         />

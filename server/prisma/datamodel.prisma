@@ -15,4 +15,7 @@ type Post {
 type Item {
   id: ID! @id
   title: String!
+  done: Boolean! @default(value: false)
 }
+
+

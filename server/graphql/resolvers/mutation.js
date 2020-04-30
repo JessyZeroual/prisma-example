@@ -24,6 +24,13 @@ const Mutation = {
   deleteItem(root, args, context) {
     return context.prisma.deleteItem({ id: args.id });
   },
+
+  updateItem(root, args, context) {
+    return context.prisma.updateItem({
+      where: { id: args.id },
+      data: { title: args.title, done: args.done },
+    });
+  },
 };
 
 module.exports = { Mutation };

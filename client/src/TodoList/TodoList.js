@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import GET_ITEMS from "./gql/query/getItems";
 import DELETE_ITEM from "./gql/mutation/deleteItem";
+import UPDATE_ITEM from "./gql/mutation/updateItem";
 
 import CreateItem from "./CreateItem";
 
@@ -10,6 +11,7 @@ import { ListGroup, ListGroupItem, Button } from "reactstrap";
 const TodoList = () => {
   const { loading, data } = useQuery(GET_ITEMS);
   const [deleteItem] = useMutation(DELETE_ITEM);
+  const [updateItem] = useMutation(UPDATE_ITEM);
 
   if (loading) return <div>loading...</div>;
 
@@ -20,9 +22,28 @@ const TodoList = () => {
       </ListGroupItem>
       {data.items.map((item) => {
         return (
-          <ListGroupItem>
-            <div className="d-flex">
-              {item.title}
+          <ListGroupItem key={item.id}>
+            <div className="d-flex align-items-center">
+              <input
+                type="checkbox"
+                checked={item.done}
+                onChange={() => {
+                  updateItem({
+                    variables: {
+                      id: item.id,
+                      done: !item.done,
+                    },
+                  });
+                }}
+              />
+              <div
+                className={`todolist-item ${
+                  item.done ? "todolist-item-done" : ""
+                }`}
+              >
+                {item.title}
+              </div>
+
               <Button
                 color="danger"
                 onClick={() => {
